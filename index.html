@@ -2,209 +2,183 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eladio & Paola - Feliz Cumple Mes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Feliz Cumple Mes - E&P</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial', sans-serif; }
-        #ui-layer {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            text-align: center; color: white; pointer-events: none; z-index: 10;
-            width: 100%;
+        :root { --accent: #ff1493; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Roboto, sans-serif; }
+        
+        #ui {
+            position: absolute;
+            /* Margen dinámico para móviles (Safe Area) */
+            top: env(safe-area-inset-top, 20px);
+            left: env(safe-area-inset-left, 20px);
+            right: env(safe-area-inset-right, 20px);
+            bottom: env(safe-area-inset-bottom, 20px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            z-index: 10;
+            padding: 20px;
         }
-        h1 { font-size: 3rem; margin: 0; letter-spacing: 10px; text-shadow: 0 0 20px #ff1493; }
-        #gesture-text { font-size: 1.5rem; color: #ff69b4; margin-top: 20px; font-weight: bold; }
+
+        .header h1 { 
+            font-size: clamp(1.5rem, 8vw, 3rem); 
+            margin: 0; 
+            text-shadow: 0 0 20px var(--accent); 
+            letter-spacing: 4px;
+            color: white;
+            text-align: center;
+        }
+
+        .footer #status { 
+            font-size: clamp(1rem, 4vw, 1.4rem); 
+            color: #ff69b4; 
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid var(--accent);
+        }
+
+        video { display: none; }
         
-        /* Video oculto pero necesario para el tracking */
-        #webcam { position: absolute; opacity: 0; pointer-events: none; width: 640px; height: 480px; }
-        
-        .loading {
+        .loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #ff1493; display: flex;
+            background: #000; color: var(--accent); display: flex;
             flex-direction: column; justify-content: center; align-items: center; z-index: 100;
         }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid #333;
-            border-top: 5px solid #ff1493; border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
+
+        .heart-spinner {
+            width: 50px; height: 50px; border: 3px solid var(--accent);
+            border-radius: 50%; border-top-color: transparent;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading">
-    <div class="spinner"></div>
-    <h2>Preparando la sorpresa...</h2>
-    <p>Asegúrate de dar permiso a la cámara</p>
+<div id="loader" class="loader">
+    <div class="heart-spinner"></div>
+    <p>Iniciando Experiencia...</p>
 </div>
 
-<div id="ui-layer">
-    <h1 id="main-title">ELADIO & PAOLA</h1>
-    <p id="gesture-text">Esperando conexión...</p>
+<div id="ui">
+    <div class="header">
+        <h1 id="title">ELADIO & PAOLA</h1>
+    </div>
+    <div class="footer">
+        <p id="status">Mueve tu mano para empezar</p>
+    </div>
 </div>
 
-<video id="webcam" autoplay playsinline></video>
+<video id="input_video" playsinline></video>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-    const videoElement = document.getElementById('webcam');
-    const loadingScreen = document.getElementById('loading');
-    const gestureText = document.getElementById('gesture-text');
-    const mainTitle = document.getElementById('main-title');
+    const videoElement = document.getElementById('input_video');
+    const statusText = document.getElementById('status');
+    const loader = document.getElementById('loader');
     
-    let scene, camera, renderer, particles;
-    const PARTICLE_COUNT = 20000;
-    let targetPositions = { heart: [], random: [], date: [], circle: [] };
-    let currentMode = 'random';
+    // --- THREE.JS SETUP ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    // 1. Inicializar Three.js
-    function initThree() {
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
-        camera.position.z = 500;
+    camera.position.z = 450;
 
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+    const count = 18000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
 
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(PARTICLE_COUNT * 3);
-        const colors = new Float32Array(PARTICLE_COUNT * 3);
-
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            positions[i*3] = (Math.random() - 0.5) * 1000;
-            positions[i*3+1] = (Math.random() - 0.5) * 1000;
-            positions[i*3+2] = (Math.random() - 0.5) * 1000;
-            
-            colors[i*3] = 1; 
-            colors[i*3+1] = 0.2 + Math.random() * 0.3; 
-            colors[i*3+2] = 0.5 + Math.random() * 0.5;
-        }
-
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-        const material = new THREE.PointsMaterial({
-            size: 2, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.8
-        });
-
-        particles = new THREE.Points(geometry, material);
-        scene.add(particles);
-        createShapes();
-        animate();
+    for (let i = 0; i < count; i++) {
+        positions[i*3] = (Math.random() - 0.5) * 1000;
+        positions[i*3+1] = (Math.random() - 0.5) * 1000;
+        positions[i*3+2] = (Math.random() - 0.5) * 500;
+        colors[i*3] = 1; colors[i*3+1] = 0.1; colors[i*3+2] = 0.6;
     }
 
-    function createShapes() {
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            // CORAZÓN
-            const t = Math.random() * Math.PI * 2;
-            const xH = 16 * Math.pow(Math.sin(t), 3);
-            const yH = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
-            targetPositions.heart.push(new THREE.Vector3(xH * 15, yH * 15, (Math.random()-0.5)*50));
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const points = new THREE.Points(geometry, new THREE.PointsMaterial({ size: 2, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.8 }));
+    scene.add(points);
 
-            // FECHA (08/06/2025)
-            targetPositions.date.push(new THREE.Vector3((Math.random()-0.5)*600, (Math.random()-0.5)*40, 0));
-
-            // CÍRCULO
-            const angle = Math.random() * Math.PI * 2;
-            const radius = 280;
-            targetPositions.circle.push(new THREE.Vector3(Math.cos(angle)*radius, Math.sin(angle)*radius, (Math.random()-0.5)*100));
-
-            // ALEATORIO
-            targetPositions.random.push(new THREE.Vector3((Math.random()-0.5)*1000, (Math.random()-0.5)*800, (Math.random()-0.5)*500));
-        }
+    // Formas precalculadas
+    const shapes = { heart: [], random: [], date: [] };
+    for (let i = 0; i < count; i++) {
+        const t = Math.random() * Math.PI * 2;
+        shapes.heart.push(new THREE.Vector3(16 * Math.pow(Math.sin(t), 3) * 12, (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * 12, 0));
+        shapes.date.push(new THREE.Vector3((Math.random()-0.5)*500, (Math.random()-0.5)*30, (Math.random()-0.5)*20));
+        shapes.random.push(new THREE.Vector3((Math.random()-0.5)*1000, (Math.random()-0.5)*800, (Math.random()-0.5)*400));
     }
 
-    // 2. Configuración de MediaPipe Hands
-    const hands = new Hands({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-    });
+    let currentShape = 'random';
 
-    hands.setOptions({
-        maxNumHands: 1,
-        modelComplexity: 1,
-        minDetectionConfidence: 0.6,
-        minTrackingConfidence: 0.6
-    });
+    // --- MEDIAPIPE SETUP ---
+    const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+    hands.setOptions({ maxNumHands: 1, minDetectionConfidence: 0.7 });
 
     hands.onResults((results) => {
+        loader.style.display = 'none';
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            const landmarks = results.multiHandLandmarks[0];
-            
-            // Detección de dedos: Comparar punta del dedo con articulación anterior
-            const indexUp = landmarks[8].y < landmarks[6].y;
-            const middleUp = landmarks[12].y < landmarks[10].y;
-            const ringUp = landmarks[16].y < landmarks[14].y;
-            const pinkyUp = landmarks[20].y < landmarks[18].y;
+            const l = results.multiHandLandmarks[0];
+            const isIndexUp = l[8].y < l[6].y;
+            const isMiddleUp = l[12].y < l[10].y;
+            const isPinkyUp = l[20].y < l[18].y;
 
-            // GESTOS
-            if (indexUp && middleUp && !ringUp) { // Gesto Paz
-                currentMode = 'heart';
-                gestureText.innerText = "❤️ Feliz Cumple Mes ❤️";
-            } else if (indexUp && !middleUp) { // Solo Índice
-                currentMode = 'date';
-                gestureText.innerText = "Nuestra Fecha: 08 / 06 / 2025";
-            } else if (indexUp && middleUp && ringUp && pinkyUp) { // Mano Abierta
-                currentMode = 'circle';
-                gestureText.innerText = "Unidos por siempre";
-            } else { // Puño u otros
-                currentMode = 'random';
-                gestureText.innerText = "Mueve tu mano sobre el universo";
+            if (isIndexUp && isMiddleUp && !isPinkyUp) {
+                currentShape = 'heart';
+                statusText.innerText = "❤️ Feliz Cumple Mes ❤️";
+            } else if (isIndexUp && !isMiddleUp) {
+                currentShape = 'date';
+                statusText.innerText = "Nuestra Fecha: 08/06/2025";
+            } else {
+                currentShape = 'random';
+                statusText.innerText = "¡Mueve la magia!";
             }
 
-            // Seguimiento suave de la mano
-            const targetX = (landmarks[9].x - 0.5) * -800;
-            const targetY = (landmarks[9].y - 0.5) * -600;
-            particles.position.x += (targetX - particles.position.x) * 0.1;
-            particles.position.y += (targetY - particles.position.y) * 0.1;
+            // Movimiento suave siguiendo la mano (invirtiendo X para efecto espejo)
+            points.position.x += ((l[9].x - 0.5) * -700 - points.position.x) * 0.15;
+            points.position.y += ((l[9].y - 0.5) * -500 - points.position.y) * 0.15;
         }
     });
 
-    // 3. Inicializar Cámara
     const cam = new Camera(videoElement, {
-        onFrame: async () => {
-            await hands.send({image: videoElement});
-            if(loadingScreen.style.display !== 'none') {
-                loadingScreen.style.display = 'none';
-                gestureText.innerText = "¡Lista la sorpresa! Mueve la mano.";
-            }
-        },
-        width: 640,
-        height: 480
+        onFrame: async () => { await hands.send({ image: videoElement }); },
+        width: 640, height: 480
     });
     cam.start();
 
-    // 4. Bucle de Animación
+    // --- LOOP ---
     function animate() {
         requestAnimationFrame(animate);
-        
-        const positions = particles.geometry.attributes.position.array;
-        const target = targetPositions[currentMode];
-
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const pos = points.geometry.attributes.position.array;
+        const target = shapes[currentShape];
+        for (let i = 0; i < count; i++) {
             const i3 = i * 3;
-            // Interpolación Lerp para movimiento suave
-            positions[i3] += (target[i].x - positions[i3]) * 0.08;
-            positions[i3+1] += (target[i].y - positions[i3+1]) * 0.08;
-            positions[i3+2] += (target[i].z - positions[i3+2]) * 0.08;
+            pos[i3] += (target[i].x - pos[i3]) * 0.1;
+            pos[i3+1] += (target[i].y - pos[i3+1]) * 0.1;
+            pos[i3+2] += (target[i].z - pos[i3+2]) * 0.1;
         }
-
-        particles.geometry.attributes.position.needsUpdate = true;
-        particles.rotation.y += 0.0015;
+        points.geometry.attributes.position.needsUpdate = true;
+        points.rotation.y += 0.002;
         renderer.render(scene, camera);
     }
+    animate();
 
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
-
-    initThree();
 </script>
 </body>
 </html>
