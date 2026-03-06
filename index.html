@@ -1,282 +1,698 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eladio & Paola - Nuestra Historia de Amor</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-    
-    <!-- MediaPipe Hands -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Eladio & Paola · Aniversario</title>
+  <!-- Google Fonts: elegancia moderna -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET Y VARIABLES ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        :root {
-            --primary-gold: #D4AF37;
-            --secondary-gold: #FFD700;
-            --text-light: #FFFFFF;
-            --text-dim: #B8B8B8;
-            --bg-dark: #0A0A0A;
-            --accent-color: var(--primary-gold);
-        }
+    :root {
+      --bg-dark: #0a0a0a;
+      --accent-gold: #D4AF37;
+      --accent-rose: #E6A8B0;        /* rosa elegante, no saturado */
+      --text-light: #f0f0f0;
+      --text-dim: #aaaaaa;
+      --font-primary: 'Montserrat', sans-serif;
+      --font-display: 'Playfair Display', serif;
+      --accent-current: var(--accent-gold);
+      --transition-smooth: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-light);
-            overflow-x: hidden;
-            min-height: 100vh;
-            position: relative;
-        }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      font-family: var(--font-primary);
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      margin: 0;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
 
-        /* Safe Areas */
-        @supports (padding: max(0px)) {
-            body {
-                padding-left: max(1rem, env(safe-area-inset-left));
-                padding-right: max(1rem, env(safe-area-inset-right));
-                padding-top: max(1rem, env(safe-area-inset-top));
-                padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    /* capas de canvas */
+    .canvas-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;  /* para que los clics pasen al contenido */
+      z-index: 1;
+    }
+
+    #bg-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #effects-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* contenido principal */
+    .content {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      pointer-events: none;  /* para que los elementos hijos puedan recibir eventos si es necesario */
+    }
+
+    .content > * {
+      pointer-events: auto;  /* los textos son interactuables (aunque no hay botones) */
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 12vw, 5rem);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      color: var(--text-light);
+      text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+    h1 span {
+      color: var(--accent-current);
+      font-weight: 400;
+      transition: var(--transition-smooth);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--accent-current);
+      padding-bottom: 0.8rem;
+      display: inline-block;
+    }
+
+    .counter {
+      font-size: calc(3rem * var(--counter-scale, 1));
+      font-weight: 600;
+      line-height: 1.2;
+      margin: 2rem 0;
+      transition: font-size 0.2s ease;
+      color: var(--accent-current);
+      font-family: var(--font-display);
+      text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+    }
+
+    .counter-unit {
+      font-size: 0.5em;
+      color: var(--text-dim);
+      font-family: var(--font-primary);
+    }
+
+    /* indicador de gestos (feedback) */
+    .gesture-indicator {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      right: max(20px, env(safe-area-inset-right));
+      background: rgba(10, 10, 10, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--accent-current);
+      border-radius: 40px;
+      padding: 0.6rem 1.5rem;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      z-index: 100;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      transition: border-color 0.2s;
+    }
+
+    .gesture-indicator span {
+      color: var(--accent-current);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* mensaje flotante para victoria */
+    .floating-message {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8);
+      border-left: 4px solid var(--accent-current);
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1.5rem;
+      color: #fff;
+      font-family: var(--font-display);
+      white-space: nowrap;
+      box-shadow: 0 0 30px rgba(212,175,55,0.3);
+      z-index: 200;
+      animation: fadeInOut 2.5s ease forwards;
+      pointer-events: none;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, 30%); }
+      15% { opacity: 1; transform: translate(-50%, -50%); }
+      85% { opacity: 1; transform: translate(-50%, -50%); }
+      100% { opacity: 0; transform: translate(-50%, -80%); }
+    }
+
+    /* texto de copyright o nota */
+    .footer-note {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      z-index: 10;
+      opacity: 0.6;
+    }
+
+    /* video oculto para MediaPipe */
+    #video-feed {
+      display: none;
+    }
+
+    /* responsividad extra */
+    @media (max-width: 600px) {
+      .counter {
+        font-size: calc(2.2rem * var(--counter-scale, 1));
+      }
+      .gesture-indicator {
+        bottom: 10px;
+        right: 10px;
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Canvas de fondo (partículas fijas) -->
+  <canvas id="bg-canvas" class="canvas-layer"></canvas>
+  <!-- Canvas para efectos dinámicos: confeti, trail, corazones -->
+  <canvas id="effects-canvas" class="canvas-layer"></canvas>
+
+  <!-- Contenido principal -->
+  <div class="content">
+    <h1>ELADIO <span>✦</span> PAOLA</h1>
+    <div class="subtitle">CUMPLE MES</div>
+    <div class="counter" id="counter">--</div>
+    <!-- pequeño espacio -->
+    <div style="height: 10vh;"></div>
+  </div>
+
+  <!-- Indicador de gesto en vivo -->
+  <div class="gesture-indicator" id="gesture-indicator">
+    ✦ GESTO: <span id="gesture-name">---</span>
+  </div>
+
+  <!-- Mensaje flotante (oculto por defecto) -->
+  <div id="floating-message-container" style="position: fixed; top:0; left:0; width:100%; height:0; z-index:200; pointer-events: none;"></div>
+
+  <!-- Video oculto para MediaPipe -->
+  <video id="video-feed" playsinline></video>
+
+  <!-- Pie de página (opcional) -->
+  <div class="footer-note">✦ gestos con la mano ✦</div>
+
+  <!-- Librerías MediaPipe -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+  <script>
+    (function() {
+      // --- CONFIGURACIÓN INICIAL ---
+      const startDate = new Date(2025, 7, 6); // 6 de Agosto 2025 (mes 7 = Agosto)
+      
+      // Variables de estado
+      let counterScale = 1.0;
+      let confettiPaused = false;
+      let confettiArray = [];
+      let effectsArray = [];   // para partículas de corazón y trail
+      let pointerTrail = [];    // puntos para el rastro de luz (apuntar)
+      let accentColors = ['#D4AF37', '#E6A8B0']; // dorado, rosa
+      let accentIndex = 0;
+      let currentAccent = accentColors[0];
+      document.documentElement.style.setProperty('--accent-current', currentAccent);
+
+      // Frases románticas (victoria)
+      const lovePhrases = [
+        "Mi media naranja",
+        "Siempre juntos",
+        "Eres mi luz",
+        "Amor infinito",
+        "Cada día a tu lado",
+        "Mi lugar favorito",
+        "Te elijo hoy y siempre",
+        "Latido a latido"
+      ];
+
+      // --- ELEMENTOS DOM ---
+      const bgCanvas = document.getElementById('bg-canvas');
+      const effectsCanvas = document.getElementById('effects-canvas');
+      const ctxBg = bgCanvas.getContext('2d');
+      const ctxFx = effectsCanvas.getContext('2d');
+      const counterEl = document.getElementById('counter');
+      const gestureNameSpan = document.getElementById('gesture-name');
+      const floatingContainer = document.getElementById('floating-message-container');
+      
+      // --- CÁMARA Y MEDIAPIPE ---
+      const videoElement = document.getElementById('video-feed');
+      let hands = null;
+      let camera = null;
+      let lastGesture = 'none';
+      let currentGesture = 'none';
+      let lastGestureTrigger = ''; // para evitar repeticiones
+      let pointingActive = false;
+      let handLandmarks = null; // para guardar puntos de la mano actual
+
+      // --- FUNCIÓN DE ACTUALIZACIÓN DEL CONTADOR (desde 06/08/2025) ---
+      function updateTimeCounter() {
+        const now = new Date();
+        let diffMs = now - startDate;
+        if (diffMs < 0) diffMs = 0; // por si acaso fecha futura, mostramos cero
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const years = Math.floor(diffDays / 365);
+        const months = Math.floor((diffDays % 365) / 30.44); // aprox
+        const days = Math.floor((diffDays % 365) % 30.44);
+        
+        let text = '';
+        if (years > 0) text += `${years} año${years !== 1 ? 's' : ''} `;
+        if (months > 0 || years > 0) text += `${months} mes${months !== 1 ? 'es' : ''} `;
+        text += `${days} día${days !== 1 ? 's' : ''}`;
+        counterEl.innerText = text;
+      }
+      updateTimeCounter();
+      setInterval(updateTimeCounter, 60000); // actualizar cada minuto
+
+      // --- PARTÍCULAS DE FONDO (polvo estelar) ---
+      let particles = [];
+      const PARTICLE_COUNT = 80;
+      let mouse = { x: -1000, y: -1000 };
+
+      function initParticles() {
+        particles = [];
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            radius: Math.random() * 3 + 1,
+            vx: (Math.random() - 0.5) * 0.2,
+            vy: (Math.random() - 0.5) * 0.1,
+            alpha: Math.random() * 0.6 + 0.2,
+          });
+        }
+      }
+
+      function updateParticles() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        for (let p of particles) {
+          // movimiento base
+          p.x += p.vx;
+          p.y += p.vy;
+
+          // rebote suave en bordes
+          if (p.x < 0) { p.x = 0; p.vx *= -0.8; }
+          if (p.x > w) { p.x = w; p.vx *= -0.8; }
+          if (p.y < 0) { p.y = 0; p.vy *= -0.8; }
+          if (p.y > h) { p.y = h; p.vy *= -0.8; }
+
+          // reacción al mouse (repulsión suave)
+          const dx = p.x - mouse.x;
+          const dy = p.y - mouse.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 80) {
+            const force = (80 - dist) / 80 * 0.5;
+            const angle = Math.atan2(dy, dx);
+            p.x += Math.cos(angle) * force * 2;
+            p.y += Math.sin(angle) * force * 2;
+          }
+        }
+      }
+
+      function drawParticles() {
+        ctxBg.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+        ctxBg.fillStyle = '#0a0a0a';
+        ctxBg.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+        
+        for (let p of particles) {
+          ctxBg.beginPath();
+          ctxBg.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctxBg.fillStyle = `rgba(212, 175, 55, ${p.alpha})`;
+          ctxBg.fill();
+          // pequeño destello ocasional
+          if (Math.random() < 0.01) {
+            ctxBg.shadowColor = '#D4AF37';
+            ctxBg.shadowBlur = 10;
+          } else {
+            ctxBg.shadowBlur = 0;
+          }
+        }
+        ctxBg.shadowBlur = 0;
+      }
+
+      // --- CONFETTI DIGITAL (sencillo) ---
+      function initConfetti() {
+        confettiArray = [];
+        for (let i = 0; i < 60; i++) {
+          confettiArray.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight - window.innerHeight,
+            size: Math.random() * 8 + 4,
+            speedY: Math.random() * 2 + 1,
+            color: `hsl(${Math.random() * 30 + 45}, 80%, 60%)`, // dorados
+            rot: Math.random() * Math.PI * 2,
+          });
+        }
+      }
+
+      function updateConfetti() {
+        if (confettiPaused) return;
+        for (let c of confettiArray) {
+          c.y += c.speedY * 0.8;
+          c.rot += 0.01;
+          if (c.y > window.innerHeight + 50) {
+            c.y = -50;
+            c.x = Math.random() * window.innerWidth;
+          }
+        }
+      }
+
+      function drawConfetti() {
+        for (let c of confettiArray) {
+          ctxFx.save();
+          ctxFx.translate(c.x, c.y);
+          ctxFx.rotate(c.rot);
+          ctxFx.fillStyle = c.color;
+          ctxFx.fillRect(-c.size/2, -c.size/2, c.size, c.size/2);
+          ctxFx.restore();
+        }
+      }
+
+      // --- PARTÍCULAS DE CORAZÓN (explosión) ---
+      function createHeartExplosion(centerX, centerY) {
+        for (let i = 0; i < 20; i++) {
+          const angle = (Math.PI * 2 * i) / 20;
+          const speed = 2 + Math.random() * 3;
+          effectsArray.push({
+            type: 'heart',
+            x: centerX,
+            y: centerY,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1.0,
+            size: 20 + Math.random() * 10,
+          });
+        }
+      }
+
+      // --- RASTRO DE LUZ (pointing) ---
+      function updatePointerTrail(x, y) {
+        if (!pointingActive) return;
+        pointerTrail.push({ x, y, life: 1.0 });
+        if (pointerTrail.length > 20) pointerTrail.shift();
+      }
+
+      function drawEffects() {
+        // dibujar corazones activos
+        for (let i = effectsArray.length - 1; i >= 0; i--) {
+          const e = effectsArray[i];
+          if (e.type === 'heart') {
+            e.x += e.vx;
+            e.y += e.vy;
+            e.life -= 0.01;
+            e.size *= 0.99;
+            if (e.life <= 0 || e.y > window.innerHeight + 100) {
+              effectsArray.splice(i, 1);
+              continue;
             }
+            ctxFx.save();
+            ctxFx.translate(e.x, e.y);
+            ctxFx.font = `${e.size}px 'Playfair Display', serif`;
+            ctxFx.fillStyle = `rgba(212, 175, 55, ${e.life})`;
+            ctxFx.fillText('❤️', -e.size/2, e.size/2);
+            ctxFx.restore();
+          }
         }
 
-        /* Canvas Background */
-        #particleCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            pointer-events: none;
+        // dibujar trail de apuntar
+        if (pointerTrail.length > 1) {
+          for (let i = 0; i < pointerTrail.length; i++) {
+            const p = pointerTrail[i];
+            p.life *= 0.98; // desvanece
+            const alpha = p.life;
+            ctxFx.beginPath();
+            ctxFx.arc(p.x, p.y, 6 * alpha + 2, 0, Math.PI*2);
+            ctxFx.fillStyle = `rgba(212, 175, 55, ${alpha*0.7})`;
+            ctxFx.shadowColor = '#D4AF37';
+            ctxFx.shadowBlur = 15;
+            ctxFx.fill();
+          }
+          ctxFx.shadowBlur = 0;
+          // mantener solo los vivos
+          pointerTrail = pointerTrail.filter(p => p.life > 0.02);
+        }
+      }
+
+      // --- DETECCIÓN DE GESTOS (basado en landmarks) ---
+      function detectGestures(landmarks, handiness) {
+        if (!landmarks) return 'none';
+
+        // Índices útiles
+        const wrist = landmarks[0];
+        const thumbTip = landmarks[4];
+        const indexTip = landmarks[8];
+        const middleTip = landmarks[12];
+        const ringTip = landmarks[16];
+        const pinkyTip = landmarks[20];
+        const indexPip = landmarks[6];
+        const middlePip = landmarks[10];
+        const ringPip = landmarks[14];
+        const pinkyPip = landmarks[18];
+        const thumbIp = landmarks[3]; // para thumb
+
+        // Funciones auxiliares: dedo extendido (comparando eje Y, asumiendo mano vertical)
+        const isExtended = (tip, pip) => tip.y < pip.y - 0.03; // margen
+        // Para pulgar, en mano derecha extendido si tip.x > ip.x; izquierda al revés
+        const thumbExtended = (handiness === 'Right') ? thumbTip.x > thumbIp.x : thumbTip.x < thumbIp.x;
+
+        const indexExt = isExtended(indexTip, indexPip);
+        const middleExt = isExtended(middleTip, middlePip);
+        const ringExt = isExtended(ringTip, ringPip);
+        const pinkyExt = isExtended(pinkyTip, pinkyPip);
+
+        // 1. Puño cerrado: todos los dedos NO extendidos (excepto pulgar?)
+        const fist = !indexExt && !middleExt && !ringExt && !pinkyExt && !thumbExtended;
+
+        // 2. Palma abierta: todos extendidos
+        const palm = indexExt && middleExt && ringExt && pinkyExt && thumbExtended;
+
+        // 3. Victoria (V): índice y medio extendidos, otros no
+        const victory = indexExt && middleExt && !ringExt && !pinkyExt && !thumbExtended;
+
+        // 4. Pulgar arriba: solo pulgar extendido
+        const thumbsUp = thumbExtended && !indexExt && !middleExt && !ringExt && !pinkyExt;
+
+        // 5. Corazón (finger heart): pulgar e índice tocándose (distancia pequeña)
+        const thumbIndexDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+        const heart = thumbIndexDist < 0.05 && !middleExt && !ringExt && !pinkyExt; // otros dedos cerrados
+
+        // 6. Apuntar: solo índice extendido
+        const point = indexExt && !middleExt && !ringExt && !pinkyExt && !thumbExtended;
+
+        if (palm) return 'open_palm';
+        if (fist) return 'closed_fist';
+        if (victory) return 'victory';
+        if (thumbsUp) return 'thumbs_up';
+        if (heart) return 'heart';
+        if (point) return 'pointing';
+        return 'none';
+      }
+
+      // --- ACCIONES SEGÚN GESTO (se llama cuando cambia) ---
+      function handleGestureChange(newGesture) {
+        if (newGesture === lastGestureTrigger) return; // ya ejecutado
+        lastGestureTrigger = newGesture;
+
+        // Open palm: pausar/reanudar confeti
+        if (newGesture === 'open_palm') {
+          confettiPaused = !confettiPaused;
+        }
+        // Closed fist: cambiar color acento
+        else if (newGesture === 'closed_fist') {
+          accentIndex = (accentIndex + 1) % accentColors.length;
+          currentAccent = accentColors[accentIndex];
+          document.documentElement.style.setProperty('--accent-current', currentAccent);
+        }
+        // Victory: mostrar frase aleatoria
+        else if (newGesture === 'victory') {
+          const phrase = lovePhrases[Math.floor(Math.random() * lovePhrases.length)];
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'floating-message';
+          msgDiv.innerText = phrase;
+          floatingContainer.appendChild(msgDiv);
+          setTimeout(() => msgDiv.remove(), 2500);
+        }
+        // Thumbs up: aumentar tamaño del contador
+        else if (newGesture === 'thumbs_up') {
+          counterScale = Math.min(2.2, counterScale + 0.15);
+          counterEl.style.setProperty('--counter-scale', counterScale);
+        }
+        // Heart: explosión de corazones
+        else if (newGesture === 'heart') {
+          createHeartExplosion(window.innerWidth/2, window.innerHeight/2);
+        }
+        // Pointing: se activa flag, el trail se dibuja aparte
+        // no action extra aquí, solo activar pointingActive en el loop
+      }
+
+      // --- MEDIAPIPE HANDS SETUP ---
+      async function initMediaPipe() {
+        hands = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+
+        hands.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 0, // 0 es más rápido
+          minDetectionConfidence: 0.6,
+          minTrackingConfidence: 0.6
+        });
+
+        hands.onResults(onHandResults);
+
+        camera = new Camera(videoElement, {
+          onFrame: async () => {
+            await hands.send({ image: videoElement });
+          },
+          width: 640,
+          height: 480,
+          facingMode: 'user'
+        });
+        camera.start().catch(e => {
+          console.warn("Cámara no disponible, gestos desactivados");
+          gestureNameSpan.innerText = 'SIN CÁMARA';
+        });
+      }
+
+      function onHandResults(results) {
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+          // Tomamos la primera mano para simplificar
+          const landmarks = results.multiHandLandmarks[0];
+          const handedness = results.multiHandedness[0].label; // 'Left' o 'Right'
+          const gesture = detectGestures(landmarks, handedness);
+          currentGesture = gesture;
+
+          // Para pointing, guardar posición del índice (landmark 8)
+          if (gesture === 'pointing') {
+            const idxTip = landmarks[8];
+            // mapear coordenadas normalizadas a tamaño canvas
+            const x = idxTip.x * window.innerWidth;
+            const y = idxTip.y * window.innerHeight;
+            pointingActive = true;
+            updatePointerTrail(x, y);
+          } else {
+            pointingActive = false;
+          }
+
+          // Actualizar UI de gesto
+          gestureNameSpan.innerText = gesture.replace('_', ' ').toUpperCase();
+
+          // Disparar cambio si el gesto es diferente al anterior
+          if (gesture !== lastGesture) {
+            handleGestureChange(gesture);
+            lastGesture = gesture;
+          }
+        } else {
+          currentGesture = 'none';
+          gestureNameSpan.innerText = '---';
+          pointingActive = false;
+          lastGesture = 'none';
+        }
+      }
+
+      // --- RAF LOOP PRINCIPAL (dibujado) ---
+      function animate() {
+        // Redimensionar canvases si cambia tamaño
+        if (bgCanvas.width !== window.innerWidth || bgCanvas.height !== window.innerHeight) {
+          bgCanvas.width = window.innerWidth;
+          bgCanvas.height = window.innerHeight;
+          effectsCanvas.width = window.innerWidth;
+          effectsCanvas.height = window.innerHeight;
+          initParticles();
+          initConfetti();
         }
 
-        /* Main Container */
-        .main-container {
-            position: relative;
-            z-index: 10;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
+        updateParticles();
+        drawParticles();
 
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeInUp 1s ease-out;
-        }
+        // Limpiar canvas de efectos
+        ctxFx.clearRect(0, 0, effectsCanvas.width, effectsCanvas.height);
 
-        .names {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2rem, 5vw, 4rem);
-            font-weight: 700;
-            color: var(--accent-color);
-            margin-bottom: 0.5rem;
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-            transition: all 0.3s ease;
+        // Actualizar y dibujar confeti
+        if (!confettiPaused) {
+          updateConfetti();
         }
+        drawConfetti();
 
-        .names.large {
-            transform: scale(1.2);
-        }
+        // Dibujar efectos (corazones, trail)
+        drawEffects();
 
-        .subtitle {
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            color: var(--text-dim);
-            font-weight: 300;
-        }
+        requestAnimationFrame(animate);
+      }
 
-        /* Time Counter */
-        .time-counter {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 20px;
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-            margin-bottom: 2rem;
-            animation: fadeInUp 1.2s ease-out;
-            transition: all 0.3s ease;
-        }
+      // --- MOUSE MOVE (para partículas) ---
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+      });
 
-        .time-counter.large {
-            transform: scale(1.1);
-            padding: 2.5rem;
-        }
+      window.addEventListener('mouseleave', () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+      });
 
-        .time-display {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 1.5rem;
-            text-align: center;
-        }
+      // Inicializar todo
+      initParticles();
+      initConfetti();
+      animate();
+      initMediaPipe();
 
-        .time-unit {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .time-value {
-            font-size: clamp(1.5rem, 3vw, 2.5rem);
-            font-weight: 600;
-            color: var(--accent-color);
-            font-family: 'Playfair Display', serif;
-        }
-
-        .time-label {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-top: 0.3rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Next Milestone */
-        .milestone {
-            text-align: center;
-            margin-bottom: 2rem;
-            animation: fadeInUp 1.4s ease-out;
-        }
-
-        .milestone-text {
-            font-size: 1.1rem;
-            color: var(--text-dim);
-            margin-bottom: 0.5rem;
-        }
-
-        .milestone-date {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
-            color: var(--accent-color);
-        }
-
-        /* Camera Controls */
-        .camera-controls {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn {
-            background: rgba(212, 175, 55, 0.1);
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 400;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn:hover {
-            background: rgba(212, 175, 55, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn.active {
-            background: var(--accent-color);
-            color: var(--bg-dark);
-        }
-
-        /* Gesture Indicator */
-        .gesture-indicator {
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--accent-color);
-            border-radius: 10px;
-            padding: 1rem;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            min-width: 200px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .gesture-indicator.active {
-            opacity: 1;
-        }
-
-        .gesture-label {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            margin-bottom: 0.3rem;
-        }
-
-        .gesture-name {
-            font-size: 1.1rem;
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        /* Video Preview */
-        #videoElement {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 200px;
-            height: 150px;
-            border-radius: 10px;
-            border: 2px solid var(--accent-color);
-            z-index: 99;
-            opacity: 0.3;
-            transition: opacity 0.3s ease;
-        }
-
-        #videoElement:hover {
-            opacity: 0.8;
-        }
-
-        /* Love Message */
-        .love-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid var(--accent-color);
-            border-radius: 20px;
-            padding: 2rem 3rem;
-            z-index: 200;
-            text-align: center;
-            backdrop-filter: blur(20px);
-            animation: messagePopup 3s ease-out forwards;
-        }
-
-        @keyframes messagePopup {
-            0% {
-                transform: translate(-50%, -50%) scale(0);
-                opacity: 0;
-            }
-            20% {
-                transform: translate(-50%, -50%) scale(1.1);
-                opacity: 1;
-            }
-            30% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-            80% {
-                transform: translate(-50%, -50%) scale(1);
-               
+      // Limpieza básica
+      window.addEventListener('unload', () => {
+        if (camera) camera.stop();
+      });
+    })();
+  </script>
+</body>
+</html>
