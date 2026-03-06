@@ -11,8 +11,8 @@
 
     <style>
         :root {
-            --accent: #D4AF37;
-            --bg: #050505;
+            --accent: #D4AF37; /* Dorado Base */
+            --bg: #030303;
             --text: #ffffff;
         }
 
@@ -36,147 +36,123 @@
             z-index: 1;
         }
 
-        .container {
+        /* --- UI Overlay --- */
+        .ui-container {
             position: relative;
             z-index: 10;
             text-align: center;
             pointer-events: none;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
         }
 
         h1 {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            color: var(--accent);
-            text-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
-            margin-bottom: 0.5rem;
+            font-size: clamp(2.2rem, 7vw, 3.5rem);
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            margin-bottom: 0.2rem;
+            transition: color 0.5s ease;
         }
 
         .subtitle {
-            font-size: 0.8rem;
-            letter-spacing: 6px;
+            font-size: 0.75rem;
+            letter-spacing: 5px;
             text-transform: uppercase;
-            opacity: 0.6;
-            margin-bottom: 3rem;
-        }
-
-        /* --- Contador Progresivo --- */
-        .timer {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .timer-unit {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 12px;
-            min-width: 100px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .timer-unit span {
-            display: block;
-            font-size: 2.5rem;
-            font-weight: 600;
+            opacity: 0.5;
             color: #fff;
+            margin-bottom: 8vh;
         }
 
-        .timer-unit label {
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        /* --- Mensaje Bonito --- */
+        #love-message {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            font-style: italic;
             color: var(--accent);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            max-width: 80%;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
         }
 
-        /* --- UI de Gestos --- */
+        #love-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- UI de Gestos (Cámara) --- */
         #video-wrap {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 180px;
-            height: 135px;
-            border-radius: 15px;
+            bottom: 25px;
+            right: 25px;
+            width: 150px;
+            height: 112px;
+            border-radius: 12px;
             overflow: hidden;
-            border: 1px solid rgba(212, 175, 55, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             z-index: 100;
             background: #000;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: border-color 0.5s ease;
         }
 
-        #input_video { transform: scaleX(-1); width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        #input_video { transform: scaleX(-1); width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
 
         .gesture-badge {
             position: absolute;
-            top: 10px;
+            bottom: 8px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--accent);
-            color: #000;
-            padding: 3px 10px;
-            border-radius: 5px;
-            font-size: 10px;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-
-        #love-overlay {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem;
+            background: rgba(0, 0, 0, 0.7);
             color: var(--accent);
-            pointer-events: none;
-            opacity: 0;
-            transition: all 0.6s ease;
-            z-index: 50;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            border: 1px solid var(--accent);
         }
 
         .init-btn {
             position: fixed;
             bottom: 50px;
-            padding: 15px 40px;
+            padding: 16px 40px;
             background: transparent;
             border: 1px solid var(--accent);
             color: var(--accent);
             cursor: pointer;
             z-index: 101;
             font-family: inherit;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            transition: 0.4s;
+            font-size: 0.8rem;
+            transition: all 0.4s;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
         }
 
-        .init-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
+        .init-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
     </style>
 </head>
 <body>
 
     <canvas id="bgCanvas"></canvas>
 
-    <div class="container">
-        <h1 id="names">Eladio & Paola</h1>
-        <div class="subtitle">Nuestro tiempo juntos</div>
+    <div class="ui-container">
+        <h1 id="main-title">Eladio & Paola</h1>
+        <div class="subtitle">06 de Agosto 2025</div>
         
-        <div class="timer" id="main-timer">
-            <div class="timer-unit"><span id="y">-</span><label>Años</label></div>
-            <div class="timer-unit"><span id="m">-</span><label>Meses</label></div>
-            <div class="timer-unit"><span id="d">-</span><label>Días</label></div>
-            <div class="timer-unit"><span id="h">-</span><label>Horas</label></div>
-            <div class="timer-unit"><span id="min">-</span><label>Min</label></div>
-            <div class="timer-unit"><span id="s">-</span><label>Seg</label></div>
-        </div>
+        <div id="love-message">Haz un gesto con la mano para empezar...</div>
     </div>
 
-    <div id="love-overlay"></div>
-
-    <button class="init-btn" id="start-btn">Comenzar Experiencia</button>
+    <button class="init-btn" id="start-btn">Iniciar Experiencia</button>
 
     <div id="video-wrap" style="display: none;">
         <video id="input_video"></video>
@@ -184,197 +160,231 @@
     </div>
 
     <script>
-        /** CONFIGURACIÓN **/
-        const startDate = new Date('2025-08-06T00:00:00');
+        /** --- CONFIGURACIÓN GENERATIVA --- **/
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
-        const phrases = ["Eres mi vida", "Te amo hoy más que ayer", "Eres perfecta", "Nuestro amor es infinito", "Juntos siempre"];
+        const loveMsg = document.getElementById('love-message');
+        const PARTICLE_COUNT = 1500; // Aumentado para formas definidas
         
-        let stars = [];
-        let trail = [];
-        let hearts = [];
-        let currentAccent = "#D4AF37";
-        let isPaused = false;
-        let scale = 1;
+        let particles = [];
+        let targetPoints = [];
+        let currentShape = 'STARS';
+        let lastGesture = '';
+        let currentAccent = "#D4AF37"; // Dorado inicial
 
-        /** MOTOR DE PARTÍCULAS MEJORADO **/
-        class Star {
-            constructor() {
-                this.reset();
+        const gesturesMap = {
+            'CORAZON': { 
+                color: '#E0115F', // Rubí
+                messages: ["Mi corazón es tuyo, Paola", "Lates en cada rincón de mi ser", "Contigo, mi mundo está completo"]
+            },
+            'FLOR': { 
+                color: '#FF69B4', // Rosa
+                messages: ["Nuestra amor florece cada día", "Eres la flor más bella", "Cultivando sueños juntos"]
+            },
+            'INFINITO': { 
+                color: '#FFFFFF', // Blanco Pureza
+                messages: ["Nuestro amor no tiene fin", "Por siempre y para siempre", "Más allá del tiempo"]
+            },
+            'PALMA': { 
+                color: '#D4AF37', // Dorado
+                messages: ["Nuestra historia es polvo estelar", "Iluminas mi oscuridad", "Viajando juntos por el universo"]
             }
-            reset() {
+        };
+
+        /** --- MOTOR DE GEOMETRÍA DE PARTÍCULAS --- **/
+        class Particle {
+            constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5;
-                this.baseOpacity = Math.random() * 0.5 + 0.2;
-                this.velocity = Math.random() * 0.3 + 0.1;
+                this.tx = this.x; // Target X
+                this.ty = this.y; // Target Y
+                this.size = Math.random() * 1.8 + 0.2;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.acc = 0.05; // Aceleración hacia el target
+                this.friction = 0.96;
             }
+
+            update() {
+                // Física sutil hacia el punto objetivo (Target)
+                let dx = this.tx - this.x;
+                let dy = this.ty - this.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (dist > 1) {
+                    this.vx += dx * this.acc * (this.size / 2);
+                    this.vy += dy * this.acc * (this.size / 2);
+                } else {
+                    // Movimiento errático sutil cuando está en posición
+                    this.vx += (Math.random() - 0.5) * 0.1;
+                    this.vy += (Math.random() - 0.5) * 0.1;
+                }
+
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
             draw() {
-                ctx.fillStyle = currentAccent;
-                ctx.globalAlpha = this.baseOpacity;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
-                this.y -= this.velocity;
-                if (this.y < -10) this.y = canvas.height + 10;
             }
         }
 
-        function initStars() {
+        function initParticles() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            stars = Array.from({length: 150}, () => new Star());
+            ctx.fillStyle = currentAccent;
+            particles = Array.from({length: PARTICLE_COUNT}, () => new Particle());
+            defineShape('PALMA'); // Forma inicial: Lluvia estelar
+        }
+
+        // --- DEFINICIÓN DE GEOMETRÍAS ---
+        function defineShape(shape) {
+            currentShape = shape;
+            targetPoints = [];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const scale = Math.min(canvas.width, canvas.height) * 0.4; // Escala relativa
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                let t = (i / PARTICLE_COUNT) * Math.PI * 2;
+                let tx, ty;
+
+                switch(shape) {
+                    case 'CORAZON':
+                        tx = cx + 16 * Math.sin(t)**3 * (scale / 18);
+                        ty = cy - (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * (scale / 18);
+                        break;
+                    case 'FLOR':
+                        let k = 5; // Número de pétalos
+                        let r = Math.cos(k * t) * scale * 0.8;
+                        tx = cx + r * Math.cos(t);
+                        ty = cy + r * Math.sin(t);
+                        break;
+                    case 'INFINITO':
+                        tx = cx + (scale * Math.cos(t)) / (1 + Math.sin(t)**2);
+                        ty = cy + (scale * Math.sin(t) * Math.cos(t)) / (1 + Math.sin(t)**2);
+                        break;
+                    default: // PALMA / STARS: Lluvia vertical
+                        tx = Math.random() * canvas.width;
+                        ty = Math.random() * canvas.height;
+                }
+                
+                // Asignar target aleatorio a cada partícula para evitar orden
+                let pIndex = Math.floor(Math.random() * particles.length);
+                particles[i].tx = tx;
+                particles[i].ty = ty;
+            }
         }
 
         function animate() {
-            ctx.fillStyle = '#050505';
+            // Fondo con rastro sutil (motion blur)
+            ctx.fillStyle = 'rgba(3, 3, 3, 0.3)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Estrellas de fondo
-            stars.forEach(s => s.draw());
-
-            // Rastro de luz (Gesto Apuntar)
-            if(!isPaused) {
-                trail.forEach((p, i) => {
-                    ctx.globalAlpha = p.a;
-                    ctx.fillStyle = currentAccent;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fill();
-                    p.a -= 0.02;
-                    if(p.a <= 0) trail.splice(i, 1);
-                });
-            }
-
-            // Explosión de Corazones
-            hearts.forEach((h, i) => {
-                ctx.globalAlpha = h.a;
-                ctx.font = `${h.s}px serif`;
-                ctx.fillText("❤️", h.x, h.y);
-                h.y += h.vy;
-                h.x += h.vx;
-                h.a -= 0.01;
-                if(h.a <= 0) hearts.splice(i, 1);
+            // Dibujar partículas con el acento actual
+            ctx.fillStyle = currentAccent;
+            ctx.globalAlpha = 0.8;
+            particles.forEach(p => {
+                p.update();
+                p.draw();
             });
 
             requestAnimationFrame(animate);
         }
 
-        /** LÓGICA DEL CONTADOR (PROGRESIVO) **/
-        function updateTime() {
-            const now = new Date();
-            let years = now.getFullYear() - startDate.getFullYear();
-            let months = now.getMonth() - startDate.getMonth();
-            let days = now.getDate() - startDate.getDate();
-
-            if (days < 0) {
-                months--;
-                days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-            }
-            if (months < 0) {
-                years--;
-                months += 12;
-            }
-
-            const diff = now - startDate;
-            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const mins = Math.floor((diff / (1000 * 60)) % 60);
-            const secs = Math.floor((diff / 1000) % 60);
-
-            document.getElementById('y').innerText = years;
-            document.getElementById('m').innerText = months;
-            document.getElementById('d').innerText = days;
-            document.getElementById('h').innerText = hours;
-            document.getElementById('min').innerText = mins;
-            document.getElementById('s').innerText = secs;
-        }
-
-        /** VISIÓN ARTIFICIAL (MEDIAPIPE) **/
+        /** --- VISIÓN ARTIFICIAL (MEDIAPIPE) --- **/
         const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
-        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.8, minTrackingConfidence: 0.7 });
+        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.85, minTrackingConfidence: 0.8 });
 
         function detectGestures(landmarks) {
             const up = (i) => landmarks[i].y < landmarks[i-2].y;
-            const thumb = landmarks[4].x < landmarks[3].x; // Simplificado para mano derecha
+            
+            // Detección Refinada
+            const index = up(8); const middle = up(12); const ring = up(16); const pinky = up(20);
+            const thumbUp = landmarks[4].y < landmarks[2].y;
 
-            if (up(8) && up(12) && up(16) && up(20)) return "PALMA";
-            if (!up(8) && !up(12) && !up(16) && !up(20)) return "PUÑO";
-            if (up(8) && up(12) && !up(16)) return "VICTORIA";
-            if (landmarks[4].y < landmarks[3].y && !up(8)) return "PULGAR";
-            if (up(8) && !up(12)) return "APUNTAR";
+            // Detección Corazón (Unión de índices y pulgares cerca)
+            const distPI = Math.hypot(landmarks[4].x - landmarks[8].x, landmarks[4].y - landmarks[8].y);
+            
+            if (index && middle && ring && pinky && thumbUp) return "PALMA";
+            if (!index && !middle && !ring && !pinky) return "INFINITO"; // Puño -> Infinito
+            if (index && middle && !ring && !pinky) return "CORAZON"; // Victoria -> Corazón
+            if (distPI < 0.06 && !middle) return "FLOR"; // Índice y Pulgar juntos
+            
             return "...";
         }
 
-        let lastAction = 0;
+        // Lógica de cambio de mensaje y color
+        function handleGestureChange(gesture) {
+            if (gesture === '...' || gesture === lastGesture || !gesturesMap[gesture]) return;
+            
+            lastGesture = gesture;
+            const data = gesturesMap[gesture];
+            
+            // Actualizar Visuales del Canvas
+            currentAccent = data.color;
+            document.documentElement.style.setProperty('--accent', data.color);
+            defineShape(gesture);
+
+            // Actualizar Mensaje Bonito con animación
+            loveMsg.classList.remove('show');
+            setTimeout(() => {
+                loveMsg.innerText = data.messages[Math.floor(Math.random()*data.messages.length)];
+                loveMsg.classList.add('show');
+            }, 500);
+        }
+
         hands.onResults(results => {
             const status = document.getElementById('g-status');
+            const videoWrap = document.getElementById('video-wrap');
+
             if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
                 status.innerText = "ESPERANDO MANO";
+                videoWrap.style.borderColor = "rgba(255,255,255,0.1)";
                 return;
             }
 
             const lm = results.multiHandLandmarks[0];
             const gesture = detectGestures(lm);
             status.innerText = gesture;
+            videoWrap.style.borderColor = currentAccent;
 
-            const now = Date.now();
-            if(now - lastAction < 600 && gesture !== "APUNTAR") return;
-
-            if(gesture === "PALMA") {
-                isPaused = !isPaused;
-                lastAction = now;
-            } else if(gesture === "PUÑO") {
-                const palette = ["#D4AF37", "#E0115F", "#FFFFFF", "#FFD700"];
-                currentAccent = palette[Math.floor(Math.random()*palette.length)];
-                document.documentElement.style.setProperty('--accent', currentAccent);
-                lastAction = now;
-            } else if(gesture === "VICTORIA") {
-                const overlay = document.getElementById('love-overlay');
-                overlay.innerText = phrases[Math.floor(Math.random()*phrases.length)];
-                overlay.style.opacity = 1;
-                setTimeout(() => overlay.style.opacity = 0, 2000);
-                lastAction = now;
-            } else if(gesture === "PULGAR") {
-                scale = scale > 1.3 ? 1 : scale + 0.1;
-                document.getElementById('main-timer').style.transform = `scale(${scale})`;
-                lastAction = now;
-            } else if(gesture === "APUNTAR") {
-                for(let i=0; i<5; i++) {
-                    trail.push({ x: (1-lm[8].x)*canvas.width, y: lm[8].y*canvas.height, r: Math.random()*5, a: 1 });
-                }
-            }
+            handleGestureChange(gesture);
         });
 
-        // Iniciar cámara
+        // --- INICIALIZACIÓN ---
         document.getElementById('start-btn').onclick = async () => {
             document.getElementById('start-btn').style.display = 'none';
             document.getElementById('video-wrap').style.display = 'block';
             const videoElement = document.getElementById('input_video');
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            videoElement.srcObject = stream;
-            videoElement.play();
             
-            const runDetection = async () => {
-                await hands.send({image: videoElement});
-                requestAnimationFrame(runDetection);
-            };
-            runDetection();
-            
-            // Efecto especial al iniciar (Corazones)
-            for(let i=0; i<30; i++) {
-                hearts.push({
-                    x: canvas.width/2, y: canvas.height/2,
-                    vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
-                    s: Math.random()*30+10, a: 1
-                });
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+                videoElement.srcObject = stream;
+                videoElement.play();
+                
+                const runDetection = async () => {
+                    await hands.send({image: videoElement});
+                    requestAnimationFrame(runDetection);
+                };
+                runDetection();
+                
+                // Mostrar primer mensaje
+                setTimeout(() => loveMsg.classList.add('show'), 1000);
+
+            } catch (err) {
+                alert("Necesitamos acceso a la cámara para la experiencia.");
+                console.error(err);
             }
         };
 
-        window.addEventListener('resize', initStars);
-        initStars();
+        window.addEventListener('resize', initParticles);
+        initParticles();
         animate();
-        setInterval(updateTime, 1000);
-        updateTime();
     </script>
 </body>
 </html>
