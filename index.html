@@ -9,138 +9,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         :root {
             --bg-dark: #070707;
             --accent-gold: #D4AF37;
             --accent-rose: #FFB7C5;
             --text-light: #ffffff;
-            --text-dim: #bbbbbb;
-            --font-primary: 'Montserrat', sans-serif;
             --font-display: 'Playfair Display', serif;
             --accent-current: var(--accent-gold);
         }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            font-family: var(--font-primary);
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .canvas-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .content {
-            position: relative;
-            z-index: 10;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            pointer-events: none;
-        }
-
-        h1 {
-            font-family: var(--font-display);
-            font-size: clamp(2rem, 10vw, 4.5rem);
-            letter-spacing: 0.15em;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
-        }
-
-        h1 span { color: var(--accent-current); transition: color 0.5s ease; }
-
-        .subtitle {
-            font-size: 0.9rem;
-            letter-spacing: 0.5em;
-            color: var(--text-dim);
-            border-bottom: 1px solid var(--accent-current);
-            padding-bottom: 0.8rem;
-            margin-bottom: 2.5rem;
-            text-transform: uppercase;
-        }
-
-        .counter {
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
-            font-weight: 300;
-            color: var(--text-light);
-            font-family: var(--font-primary);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .counter b { color: var(--accent-current); font-weight: 600; }
-
-        .gesture-indicator {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--accent-current);
-            padding: 0.6rem 1.5rem;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            z-index: 100;
-            color: var(--text-dim);
-        }
-
-        .floating-message {
-            position: fixed;
-            top: 45%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
-            border: 1px solid var(--accent-current);
-            padding: 2rem 3rem;
-            border-radius: 15px;
-            font-size: 2rem;
-            font-family: var(--font-display);
-            z-index: 200;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
-            animation: heartPop 3.5s cubic-bezier(0.17, 0.89, 0.32, 1.49) forwards;
-        }
-
-        @keyframes heartPop {
-            0% { opacity: 0; transform: translate(-50%, -20%) scale(0.5); }
-            15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            85% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
-        }
-
+        body { background-color: var(--bg-dark); color: var(--text-light); font-family: 'Montserrat', sans-serif; overflow: hidden; }
+        .canvas-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        .content { position: relative; z-index: 10; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        h1 { font-family: var(--font-display); font-size: clamp(2rem, 10vw, 4.5rem); letter-spacing: 0.15em; margin-bottom: 0.5rem; }
+        h1 span { color: var(--accent-current); }
+        .subtitle { font-size: 0.8rem; letter-spacing: 0.4em; color: #aaa; border-bottom: 1px solid var(--accent-current); padding-bottom: 0.5rem; margin-bottom: 2rem; text-transform: uppercase; }
+        .counter { background: rgba(255, 255, 255, 0.05); padding: 1rem 2rem; border-radius: 50px; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
+        .counter b { color: var(--accent-current); }
+        .gesture-indicator { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); border: 1px solid var(--accent-current); padding: 0.6rem 1.5rem; border-radius: 30px; font-size: 0.7rem; z-index: 100; }
+        .floating-message { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border: 1px solid var(--accent-current); padding: 2rem; border-radius: 15px; font-size: 1.8rem; font-family: var(--font-display); z-index: 200; text-align: center; animation: heartPop 3s ease forwards; }
+        @keyframes heartPop { 0% { opacity:0; transform: translate(-50%,-20%) scale(0.8); } 15% { opacity:1; transform: translate(-50%,-50%) scale(1); } 85% { opacity:1; transform: translate(-50%,-50%) scale(1); } 100% { opacity:0; transform: translate(-50%,-80%) scale(0.9); } }
         #video-feed { display: none; }
     </style>
 </head>
 <body>
     <canvas id="bg-canvas" class="canvas-layer"></canvas>
-    
     <div class="content">
         <div class="subtitle">Para mi persona favorita</div>
         <h1>ELADIO <span>&</span> PAOLA</h1>
-        <div id="counter" class="counter">Cargando nuestro tiempo...</div>
+        <div id="counter" class="counter">Calculando...</div>
     </div>
-
     <div class="gesture-indicator">
-        ELADIO, HAZ UN <span id="gesture-name" style="color:var(--accent-current); font-weight:bold;">CORAZÓN</span> PARA PAOLA
+        ELADIO: <span id="gesture-name" style="color:var(--accent-current)">ESPERANDO MANO...</span>
     </div>
-
     <div id="floating-message-container"></div>
     <video id="video-feed" playsinline></video>
 
@@ -149,30 +49,15 @@
 
     <script>
         (function() {
-            const startDate = new Date(2025, 7, 6); // 6 de Agosto 2025
-            const accentColors = ['#D4AF37', '#FFB7C5', '#E6E6FA'];
-            let accentIndex = 0;
-            let currentAccent = accentColors[0];
-            
-            const paolaPhrases = [
-                "Paola, eres mi vida entera ❤️",
-                "Cada día te amo más, princesa",
-                "Eres lo mejor que me pasó",
-                "Siempre juntos, mi amor",
-                "Tú haces mi mundo brillar",
-                "Mi lugar favorito es contigo"
-            ];
-
+            const startDate = new Date(2025, 7, 6);
+            const paolaPhrases = ["¡Eres mi estrella, Paola!", "Te amo infinito", "Tú iluminas mi vida", "Juntos siempre ❤️"];
             const bgCanvas = document.getElementById('bg-canvas');
-            const ctxBg = bgCanvas.getContext('2d');
-            const counterEl = document.getElementById('counter');
+            const ctx = bgCanvas.getContext('2d');
             const gestureNameSpan = document.getElementById('gesture-name');
-            const videoElement = document.getElementById('video-feed');
 
-            // --- PARTÍCULAS VIVAS ---
             let particles = [];
-            const PARTICLE_COUNT = 200;
             let isMorphing = false;
+            let currentShape = 'none';
 
             class Particle {
                 constructor() {
@@ -181,172 +66,111 @@
                 reset() {
                     this.x = Math.random() * window.innerWidth;
                     this.y = Math.random() * window.innerHeight;
-                    this.targetX = 0;
-                    this.targetY = 0;
-                    // Movimiento base tipo "brisa"
-                    this.vx = (Math.random() - 0.5) * 0.8;
-                    this.vy = (Math.random() - 0.5) * 0.8;
-                    this.radius = Math.random() * 2.5 + 0.5;
-                    this.alpha = Math.random() * 0.6 + 0.2;
+                    this.vx = (Math.random() - 0.5) * 1.5;
+                    this.vy = (Math.random() - 0.5) * 1.5;
+                    this.radius = Math.random() * 2 + 1;
+                    this.tx = 0; this.ty = 0;
                 }
                 update() {
                     if (isMorphing) {
-                        // Movimiento magnético hacia el corazón
-                        this.x += (this.targetX - this.x) * 0.08;
-                        this.y += (this.targetY - this.y) * 0.08;
+                        this.x += (this.tx - this.x) * 0.12;
+                        this.y += (this.ty - this.y) * 0.12;
                     } else {
-                        // Movimiento fluido constante
-                        this.x += this.vx;
-                        this.y += this.vy;
-                        
-                        // Rebote suave o "wrap around"
-                        if (this.x < 0) this.x = window.innerWidth;
-                        if (this.x > window.innerWidth) this.x = 0;
-                        if (this.y < 0) this.y = window.innerHeight;
-                        if (this.y > window.innerHeight) this.y = 0;
-                        
-                        // Pequeña oscilación para que parezcan luciérnagas
-                        this.vx += (Math.random() - 0.5) * 0.02;
-                        this.vy += (Math.random() - 0.5) * 0.02;
+                        this.x += this.vx; this.y += this.vy;
+                        if (this.x < 0 || this.x > window.innerWidth) this.vx *= -1;
+                        if (this.y < 0 || this.y > window.innerHeight) this.vy *= -1;
                     }
                 }
                 draw() {
-                    ctxBg.beginPath();
-                    ctxBg.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                    ctxBg.fillStyle = isMorphing ? currentAccent : `rgba(212, 175, 55, ${this.alpha})`;
-                    if (isMorphing) {
-                        ctxBg.shadowBlur = 15;
-                        ctxBg.shadowColor = currentAccent;
-                    } else {
-                        ctxBg.shadowBlur = 0;
-                    }
-                    ctxBg.fill();
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = isMorphing ? "var(--accent-rose)" : "var(--accent-gold)";
+                    ctx.fill();
                 }
             }
 
             function initParticles() {
                 particles = [];
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    particles.push(new Particle());
-                }
+                for(let i=0; i<250; i++) particles.push(new Particle());
             }
 
-            function getHeartPoint(t, scale) {
-                const x = 16 * Math.pow(Math.sin(t), 3);
-                const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                return { x: x * scale, y: y * scale };
-            }
+            function setShape(shape) {
+                if (shape === currentShape) return;
+                currentShape = shape;
+                isMorphing = (shape !== 'none');
+                const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
 
-            function setMorph(active) {
-                isMorphing = active;
-                if (active) {
-                    const centerX = window.innerWidth / 2;
-                    const centerY = window.innerHeight / 2;
-                    const scale = window.innerWidth < 600 ? 12 : 18;
-                    particles.forEach((p, i) => {
-                        const t = (i / PARTICLE_COUNT) * Math.PI * 2;
-                        const point = getHeartPoint(t, scale);
-                        p.targetX = centerX + point.x;
-                        p.targetY = centerY + point.y;
-                    });
-                }
-            }
-
-            // --- DETECCIÓN MEJORADA ---
-            function detectGestures(landmarks) {
-                const thumbTip = landmarks[4], indexTip = landmarks[8], middleTip = landmarks[12];
-                const indexPip = landmarks[6], middlePip = landmarks[10];
-                
-                const indexExt = indexTip.y < indexPip.y;
-                const middleExt = middleTip.y < middlePip.y;
-                const thumbIndexDist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
-
-                if (thumbIndexDist < 0.07 && !middleExt) return 'CORAZÓN';
-                if (indexExt && !middleExt) return 'CAMBIAR COLOR';
-                return 'FLOTANDO';
-            }
-
-            function handleGesture(gesture) {
-                gestureNameSpan.innerText = gesture;
-                if (gesture === 'CORAZÓN') {
-                    if (!isMorphing) {
-                        setMorph(true);
-                        showPhrase();
+                particles.forEach((p, i) => {
+                    let angle = (i / particles.length) * Math.PI * 2;
+                    if (shape === 'HEART') {
+                        const x = 16 * Math.pow(Math.sin(angle), 3);
+                        const y = -(13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle));
+                        p.tx = cx + x * 15; p.ty = cy + y * 15;
+                    } else if (shape === 'STAR') {
+                        let r = (i % 2 === 0) ? 200 : 80;
+                        p.tx = cx + r * Math.cos(angle); p.ty = cy + r * Math.sin(angle);
                     }
-                } else if (gesture === 'CAMBIAR COLOR') {
-                    setMorph(false);
-                    accentIndex = (accentIndex + 1) % accentColors.length;
-                    currentAccent = accentColors[accentIndex];
-                    document.documentElement.style.setProperty('--accent-current', currentAccent);
-                } else {
-                    setMorph(false);
-                }
+                });
             }
 
-            function showPhrase() {
-                const phrase = paolaPhrases[Math.floor(Math.random() * paolaPhrases.length)];
-                const container = document.getElementById('floating-message-container');
-                const div = document.createElement('div');
-                div.className = 'floating-message';
-                div.innerHTML = `<span style="color:${currentAccent}">♥</span><br>${phrase}`;
-                container.appendChild(div);
-                setTimeout(() => div.remove(), 3500);
+            function detectGestures(landmarks) {
+                const thumb = landmarks[4], index = landmarks[8], middle = landmarks[12];
+                const distThumbIndex = Math.hypot(thumb.x - index.x, thumb.y - index.y);
+                const indexExtended = index.y < landmarks[6].y;
+                const middleClosed = middle.y > landmarks[10].y;
+
+                if (distThumbIndex < 0.08) return 'HEART';
+                if (indexExtended && middleClosed) return 'STAR';
+                return 'none';
             }
 
-            // --- MEDIAPIPE ---
-            const hands = new Hands({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-            });
-            hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6 });
-            hands.onResults(results => {
-                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-                    handleGesture(detectGestures(results.multiHandLandmarks[0]));
+            const hands = new Hands({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+            hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.4, minTrackingConfidence: 0.4 });
+            hands.onResults(res => {
+                if (res.multiHandLandmarks && res.multiHandLandmarks[0]) {
+                    const g = detectGestures(res.multiHandLandmarks[0]);
+                    gestureNameSpan.innerText = g === 'none' ? "MUEVE TU MANO" : g;
+                    if (g === 'HEART') { setShape('HEART'); if(Math.random() < 0.02) showMsg(); }
+                    else if (g === 'STAR') setShape('STAR');
+                    else setShape('none');
                 } else {
-                    handleGesture('CORAZÓN');
+                    gestureNameSpan.innerText = "ESPERANDO MANO...";
+                    setShape('none');
                 }
             });
 
-            const camera = new Camera(videoElement, {
-                onFrame: async () => { await hands.send({image: videoElement}); },
+            const camera = new Camera(document.getElementById('video-feed'), {
+                onFrame: async () => { await hands.send({image: document.getElementById('video-feed')}); },
                 width: 640, height: 480
             });
             camera.start();
 
-            // --- ANIMACIÓN ---
-            function animate() {
-                ctxBg.fillStyle = 'rgba(7, 7, 7, 0.2)'; // Estela suave
-                ctxBg.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
-                
-                particles.forEach(p => {
-                    p.update();
-                    p.draw();
-                });
+            function showMsg() {
+                if (document.querySelector('.floating-message')) return;
+                const div = document.createElement('div');
+                div.className = 'floating-message';
+                div.innerText = paolaPhrases[Math.floor(Math.random()*paolaPhrases.length)];
+                document.getElementById('floating-message-container').appendChild(div);
+                setTimeout(() => div.remove(), 3000);
+            }
 
+            function animate() {
+                ctx.fillStyle = 'rgba(7,7,7,0.3)';
+                ctx.fillRect(0,0,bgCanvas.width, bgCanvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
                 requestAnimationFrame(animate);
             }
 
-            function updateCounter() {
-                const now = new Date();
-                const diff = now - startDate;
-                const daysTotal = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const months = Math.floor(daysTotal / 30.44);
-                const days = Math.floor(daysTotal % 30.44);
-                
-                counterEl.innerHTML = `Llevamos <b>${months}</b> meses y <b>${days}</b> días juntos`;
-            }
+            window.addEventListener('resize', () => { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; initParticles(); });
+            bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
+            initParticles(); animate();
 
-            window.addEventListener('resize', () => {
-                bgCanvas.width = window.innerWidth;
-                bgCanvas.height = window.innerHeight;
-                initParticles();
-            });
-
-            bgCanvas.width = window.innerWidth;
-            bgCanvas.height = window.innerHeight;
-            initParticles();
-            animate();
-            updateCounter();
-            setInterval(updateCounter, 1000 * 60 * 30);
+            setInterval(() => {
+                const diff = new Date() - startDate;
+                const m = Math.floor(diff / (1000 * 60 * 60 * 24 * 30.44));
+                const d = Math.floor((diff / (1000 * 60 * 60 * 24)) % 30.44);
+                document.getElementById('counter').innerHTML = `Llevamos <b>${m}</b> meses y <b>${d}</b> días`;
+            }, 1000);
         })();
     </script>
 </body>
