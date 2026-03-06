@@ -3,44 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eladio & Paola - Nuestro Aniversario</title>
+    <title>Eladio & Paola - Feliz Cumple Mes</title>
     <style>
-        body { margin: 0; overflow: hidden; background: radial-gradient(circle, #1a0a1a 0%, #000 100%); font-family: 'Arial', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; }
         #ui-layer {
-            position: absolute; top: 30px; width: 100%; text-align: center; color: white;
-            pointer-events: none; z-index: 10;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; color: white; pointer-events: none; z-index: 10;
         }
-        h1 { font-size: 2.5rem; margin: 0; letter-spacing: 5px; text-shadow: 0 0 15px #ff1493; }
-        #gesture-text { font-size: 1.2rem; color: #ff69b4; opacity: 0.8; margin-top: 10px; }
-        .video-container {
-            position: absolute; bottom: 20px; left: 20px;
-            width: 180px; height: 135px; border: 2px solid #ff1493;
-            border-radius: 12px; overflow: hidden; transform: scaleX(-1);
-            box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
-        }
-        #webcam { width: 100%; height: 100%; object-fit: cover; }
+        h1 { font-size: 3.5rem; margin: 0; letter-spacing: 8px; text-shadow: 0 0 20px #ff1493; opacity: 0.9; }
+        #gesture-text { font-size: 1.5rem; color: #ff69b4; margin-top: 20px; font-weight: 300; }
+        /* Cámara oculta pero funcional */
+        #webcam { display: none; }
         .loading {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; color: #ff1493; display: flex;
-            flex-direction: column; justify-content: center; align-items: center; z-index: 100;
+            justify-content: center; align-items: center; z-index: 100;
         }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading">
-    <h2>Cargando Magia...</h2>
-    <p>Prepara tu cámara, Amor</p>
-</div>
+<div id="loading" class="loading"><h2>Preparando la sorpresa...</h2></div>
 
 <div id="ui-layer">
     <h1 id="main-title">ELADIO & PAOLA</h1>
-    <p id="gesture-text">Mueve tu mano para interactuar</p>
+    <p id="gesture-text">Mueve tu mano frente a la pantalla</p>
 </div>
 
-<div class="video-container">
-    <video id="webcam" autoplay playsinline></video>
-</div>
+<video id="webcam" autoplay playsinline></video>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
@@ -53,18 +43,17 @@
     const mainTitle = document.getElementById('main-title');
     
     let scene, camera, renderer, particles;
-    const PARTICLE_COUNT = 20000;
-    let targetPositions = { heart: [], random: [], date: [] };
+    const PARTICLE_COUNT = 25000;
+    let targetPositions = { heart: [], random: [], date: [], circle: [] };
     let currentMode = 'random';
 
     function initThree() {
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-        camera.position.z = 400;
+        camera.position.z = 500;
 
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
         const geometry = new THREE.BufferGeometry();
@@ -72,131 +61,91 @@
         const colors = new Float32Array(PARTICLE_COUNT * 3);
 
         for (let i = 0; i < PARTICLE_COUNT; i++) {
-            positions[i * 3] = (Math.random() - 0.5) * 1000;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 1000;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 1000;
-            
-            colors[i * 3] = 1; // R
-            colors[i * 3 + 1] = 0.4 + Math.random() * 0.4; // G
-            colors[i * 3 + 2] = 0.6 + Math.random() * 0.4; // B
+            positions[i*3] = (Math.random() - 0.5) * 1000;
+            positions[i*3+1] = (Math.random() - 0.5) * 1000;
+            positions[i*3+2] = (Math.random() - 0.5) * 1000;
+            colors[i*3] = 1; colors[i*3+1] = 0.2; colors[i*3+2] = 0.5;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-        const material = new THREE.PointsMaterial({
-            size: 1.8,
-            vertexColors: true,
-            transparent: true,
-            opacity: 0.8,
-            blending: THREE.AdditiveBlending
-        });
-
-        particles = new THREE.Points(geometry, material);
+        particles = new THREE.Points(geometry, new THREE.PointsMaterial({
+            size: 1.5, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.7
+        }));
         scene.add(particles);
-        
         createShapes();
         animate();
     }
 
     function createShapes() {
-        // --- FORMA: CORAZÓN ---
         for (let i = 0; i < PARTICLE_COUNT; i++) {
+            // Corazón
             const t = Math.random() * Math.PI * 2;
-            const x = 16 * Math.pow(Math.sin(t), 3);
-            const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-            const z = (Math.random() - 0.5) * 20;
-            targetPositions.heart.push(new THREE.Vector3(x * 12, y * 12, z));
-        }
+            const xH = 16 * Math.pow(Math.sin(t), 3);
+            const yH = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+            targetPositions.heart.push(new THREE.Vector3(xH * 15, yH * 15, 0));
 
-        // --- FORMA: FECHA (08/06/2025) ---
-        // Simulación simple de texto en puntos
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            const x = (Math.random() - 0.5) * 400;
-            // Distribuir en línea horizontal con un poco de ruido para que parezca una fecha etérea
-            const y = (Math.random() - 0.5) * 50;
-            const z = (Math.random() - 0.5) * 10;
-            targetPositions.date.push(new THREE.Vector3(x, y, z));
-        }
+            // Fecha (Línea etérea)
+            targetPositions.date.push(new THREE.Vector3((Math.random()-0.5)*500, (Math.random()-0.5)*20, 0));
 
-        // --- FORMA: ALEATORIA (NUBE) ---
-        for (let i = 0; i < PARTICLE_COUNT; i++) {
-            targetPositions.random.push(new THREE.Vector3(
-                (Math.random() - 0.5) * 800,
-                (Math.random() - 0.5) * 600,
-                (Math.random() - 0.5) * 400
-            ));
+            // Círculo (Anillo de compromiso/unión)
+            const angle = Math.random() * Math.PI * 2;
+            targetPositions.circle.push(new THREE.Vector3(Math.cos(angle)*250, Math.sin(angle)*250, (Math.random()-0.5)*50));
+
+            // Nube
+            targetPositions.random.push(new THREE.Vector3((Math.random()-0.5)*1000, (Math.random()-0.5)*800, (Math.random()-0.5)*500));
         }
     }
 
-    const hands = new Hands({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-    });
+    const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+    hands.setOptions({ maxNumHands: 1, minDetectionConfidence: 0.8 });
 
-    hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7 });
+    hands.onResults((res) => {
+        if (res.multiHandLandmarks && res.multiHandLandmarks.length > 0) {
+            const l = res.multiHandLandmarks[0];
+            const finger = (id) => l[id].y < l[id-2].y; // Dedo levantado
 
-    hands.onResults((results) => {
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            const l = results.multiHandLandmarks[0];
-            
-            const indexUp = l[8].y < l[6].y;
-            const middleUp = l[12].y < l[10].y;
-            const pinkyUp = l[20].y < l[18].y;
-            const thumbUp = l[4].x < l[3].x; // Ajuste según mano
-
-            if (indexUp && middleUp && !pinkyUp) {
+            // GESTOS:
+            if (finger(8) && finger(12) && !finger(16)) { // PAZ -> Corazón
                 currentMode = 'heart';
-                gestureText.innerText = "¡Amor Infinito!";
-                mainTitle.innerText = "ELADIO ❤️ PAOLA";
-            } else if (indexUp && !middleUp) {
+                gestureText.innerText = "❤️ Feliz Cumple Mes ❤️";
+            } else if (finger(8) && !finger(12)) { // ÍNDICE -> Fecha
                 currentMode = 'date';
-                gestureText.innerText = "Desde el 08 / 06 / 2025";
-                mainTitle.innerText = "08 • 06 • 2025";
-            } else {
+                gestureText.innerText = "Nuestra Fecha: 08/06/2025";
+            } else if (finger(8) && finger(12) && finger(16) && finger(20)) { // PALMA -> Círculo
+                currentMode = 'circle';
+                gestureText.innerText = "Unidos por siempre";
+            } else if (l[8].y > l[5].y) { // PUÑO -> Nube
                 currentMode = 'random';
-                gestureText.innerText = "Mueve tu mano para transformar el destino";
-                mainTitle.innerText = "ELADIO & PAOLA";
-                
-                // Seguir la mano
-                const handX = (l[9].x - 0.5) * -600;
-                const handY = (l[9].y - 0.5) * -400;
-                particles.position.x += (handX - particles.position.x) * 0.1;
-                particles.position.y += (handY - particles.position.y) * 0.1;
+                gestureText.innerText = "Polvo de estrellas";
             }
+            
+            // Seguimiento de partículas a la mano
+            particles.position.x += ((l[9].x - 0.5) * -800 - particles.position.x) * 0.1;
+            particles.position.y += ((l[9].y - 0.5) * -600 - particles.position.y) * 0.1;
         }
     });
 
     const cameraInput = new Camera(videoElement, {
-        onFrame: async () => {
-            await hands.send({ image: videoElement });
-            loadingScreen.style.display = 'none';
-        },
+        onFrame: async () => { await hands.send({ image: videoElement }); loadingScreen.style.display = 'none'; },
         width: 640, height: 480
     });
     cameraInput.start();
 
     function animate() {
         requestAnimationFrame(animate);
-        const posAttr = particles.geometry.attributes.position;
+        const pos = particles.geometry.attributes.position;
         const target = targetPositions[currentMode];
-
         for (let i = 0; i < PARTICLE_COUNT; i++) {
-            const i3 = i * 3;
-            posAttr.array[i3] += (target[i].x - posAttr.array[i3]) * 0.08;
-            posAttr.array[i3+1] += (target[i].y - posAttr.array[i3+1]) * 0.08;
-            posAttr.array[i3+2] += (target[i].z - posAttr.array[i3+2]) * 0.08;
+            pos.array[i*3] += (target[i].x - pos.array[i*3]) * 0.1;
+            pos.array[i*3+1] += (target[i].y - pos.array[i*3+1]) * 0.1;
+            pos.array[i*3+2] += (target[i].z - pos.array[i*3+2]) * 0.1;
         }
-
-        posAttr.needsUpdate = true;
-        particles.rotation.y += 0.001;
+        pos.needsUpdate = true;
+        particles.rotation.y += 0.002;
         renderer.render(scene, camera);
     }
-
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
 
     initThree();
 </script>
