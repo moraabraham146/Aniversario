@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Eladio & Paola | Forever</title>
+    <title>Eladio & Paola | ∞</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
@@ -11,13 +11,12 @@
 
     <style>
         :root {
-            --accent: #D4AF37; /* Dorado */
+            --accent: #D4AF37;
             --bg: #050505;
             --text: #ffffff;
-            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-box: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--bg);
@@ -26,361 +25,356 @@
             overflow: hidden;
             height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
 
-        /* --- Canvas Background --- */
         #bgCanvas {
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 0;
-            pointer-events: none;
+            z-index: 1;
         }
 
-        /* --- UI Components --- */
-        .content {
+        .container {
             position: relative;
             z-index: 10;
             text-align: center;
             pointer-events: none;
-            width: 90%;
-            max-width: 800px;
+            width: 100%;
         }
 
         h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 3.5rem;
-            letter-spacing: 2px;
-            margin-bottom: 1rem;
+            font-size: clamp(2.5rem, 8vw, 4rem);
             color: var(--accent);
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-            transition: var(--transition);
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            margin-bottom: 0.5rem;
         }
 
+        .subtitle {
+            font-size: 0.8rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-bottom: 3rem;
+        }
+
+        /* --- Contador Progresivo --- */
         .timer {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 2rem;
-            transition: var(--transition);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .timer-unit {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            padding: 15px 25px;
-            border-radius: 8px;
-            min-width: 80px;
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            min-width: 100px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .timer-unit span {
             display: block;
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 600;
+            color: #fff;
         }
 
         .timer-unit label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.6;
+            letter-spacing: 2px;
+            color: var(--accent);
         }
 
-        .next-milestone {
-            margin-top: 3rem;
-            font-style: italic;
-            font-family: 'Playfair Display', serif;
-            opacity: 0.8;
-        }
-
-        /* --- Camera & Gestures --- */
-        #video-container {
+        /* --- UI de Gestos --- */
+        #video-wrap {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 160px;
-            height: 120px;
-            border-radius: 12px;
+            bottom: 30px;
+            right: 30px;
+            width: 180px;
+            height: 135px;
+            border-radius: 15px;
             overflow: hidden;
-            border: 2px solid var(--accent);
+            border: 1px solid rgba(212, 175, 55, 0.4);
             z-index: 100;
             background: #000;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
 
-        #input_video { transform: scaleX(-1); width: 100%; height: 100%; object-fit: cover; }
+        #input_video { transform: scaleX(-1); width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
 
-        #gesture-indicator {
+        .gesture-badge {
             position: absolute;
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--accent);
-            color: black;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 800;
             white-space: nowrap;
         }
 
-        #love-msg {
+        #love-overlay {
             position: fixed;
-            top: 20%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
+            font-size: 3rem;
             color: var(--accent);
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.5s;
+            transition: all 0.6s ease;
             z-index: 50;
         }
 
-        .camera-btn {
+        .init-btn {
             position: fixed;
-            bottom: 30px;
-            padding: 12px 24px;
+            bottom: 50px;
+            padding: 15px 40px;
             background: transparent;
             border: 1px solid var(--accent);
             color: var(--accent);
             cursor: pointer;
-            z-index: 100;
+            z-index: 101;
             font-family: inherit;
-            transition: 0.3s;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: 0.4s;
         }
 
-        .camera-btn:hover { background: var(--accent); color: black; }
+        .init-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
     </style>
 </head>
 <body>
 
     <canvas id="bgCanvas"></canvas>
 
-    <div class="content">
-        <h1 id="main-title">Eladio & Paola</h1>
-        <p style="letter-spacing: 5px; opacity: 0.7;">DESDE EL 06 DE AGOSTO, 2025</p>
+    <div class="container">
+        <h1 id="names">Eladio & Paola</h1>
+        <div class="subtitle">Nuestro tiempo juntos</div>
         
-        <div class="timer" id="timer">
-            <div class="timer-unit"><span id="months">-</span><label>Meses</label></div>
-            <div class="timer-unit"><span id="days">-</span><label>Días</label></div>
-            <div class="timer-unit"><span id="hours">-</span><label>Hrs</label></div>
-            <div class="timer-unit"><span id="mins">-</span><label>Min</label></div>
-            <div class="timer-unit"><span id="secs">-</span><label>Seg</label></div>
-        </div>
-
-        <div class="next-milestone" id="milestone-text">
-            Preparando nuestro próximo mes juntos...
+        <div class="timer" id="main-timer">
+            <div class="timer-unit"><span id="y">-</span><label>Años</label></div>
+            <div class="timer-unit"><span id="m">-</span><label>Meses</label></div>
+            <div class="timer-unit"><span id="d">-</span><label>Días</label></div>
+            <div class="timer-unit"><span id="h">-</span><label>Horas</label></div>
+            <div class="timer-unit"><span id="min">-</span><label>Min</label></div>
+            <div class="timer-unit"><span id="s">-</span><label>Seg</label></div>
         </div>
     </div>
 
-    <div id="love-msg"></div>
+    <div id="love-overlay"></div>
 
-    <button class="camera-btn" id="start-cam">Activar Control por Gestos</button>
+    <button class="init-btn" id="start-btn">Comenzar Experiencia</button>
 
-    <div id="video-container" style="display: none;">
+    <div id="video-wrap" style="display: none;">
         <video id="input_video"></video>
-        <div id="gesture-indicator">Buscando mano...</div>
+        <div class="gesture-badge" id="g-status">SISTEMA OFF</div>
     </div>
 
     <script>
-        /** 1. CONFIGURACIÓN Y CONSTANTES **/
+        /** CONFIGURACIÓN **/
         const startDate = new Date('2025-08-06T00:00:00');
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
-        const loveMsg = document.getElementById('love-msg');
-        let particles = [];
-        let confetti = [];
-        let isConfettiPaused = false;
-        let scaleFactor = 1;
-        const phrases = ["Eres mi mundo", "Por mil meses más", "Te amo infinito", "Mi lugar favorito", "Contigo siempre"];
+        const phrases = ["Eres mi vida", "Te amo hoy más que ayer", "Eres perfecta", "Nuestro amor es infinito", "Juntos siempre"];
+        
+        let stars = [];
+        let trail = [];
+        let hearts = [];
+        let currentAccent = "#D4AF37";
+        let isPaused = false;
+        let scale = 1;
 
-        /** 2. SISTEMA DE PARTÍCULAS (FONDO) **/
-        function initCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particles = [];
-            const count = Math.floor((canvas.width * canvas.height) / 10000);
-            for(let i=0; i<count; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 2,
-                    speedX: (Math.random() - 0.5) * 0.5,
-                    speedY: (Math.random() - 0.5) * 0.5
-                });
+        /** MOTOR DE PARTÍCULAS MEJORADO **/
+        class Star {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5;
+                this.baseOpacity = Math.random() * 0.5 + 0.2;
+                this.velocity = Math.random() * 0.3 + 0.1;
+            }
+            draw() {
+                ctx.fillStyle = currentAccent;
+                ctx.globalAlpha = this.baseOpacity;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                this.y -= this.velocity;
+                if (this.y < -10) this.y = canvas.height + 10;
             }
         }
 
-        function drawParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-            
-            particles.forEach(p => {
-                ctx.globalAlpha = 0.4;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                p.x += p.speedX;
-                p.y += p.speedY;
-                if(p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-                if(p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-            });
-
-            if(!isConfettiPaused) drawConfetti();
-            requestAnimationFrame(drawParticles);
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = Array.from({length: 150}, () => new Star());
         }
 
-        function drawConfetti() {
-            confetti.forEach((c, i) => {
-                ctx.globalAlpha = c.alpha;
-                ctx.fillStyle = c.color;
-                ctx.beginPath();
-                ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-                ctx.fill();
-                c.y += c.sy;
-                c.x += c.sx;
-                c.alpha -= 0.01;
-                if(c.alpha <= 0) confetti.splice(i, 1);
+        function animate() {
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Estrellas de fondo
+            stars.forEach(s => s.draw());
+
+            // Rastro de luz (Gesto Apuntar)
+            if(!isPaused) {
+                trail.forEach((p, i) => {
+                    ctx.globalAlpha = p.a;
+                    ctx.fillStyle = currentAccent;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    p.a -= 0.02;
+                    if(p.a <= 0) trail.splice(i, 1);
+                });
+            }
+
+            // Explosión de Corazones
+            hearts.forEach((h, i) => {
+                ctx.globalAlpha = h.a;
+                ctx.font = `${h.s}px serif`;
+                ctx.fillText("❤️", h.x, h.y);
+                h.y += h.vy;
+                h.x += h.vx;
+                h.a -= 0.01;
+                if(h.a <= 0) hearts.splice(i, 1);
             });
+
+            requestAnimationFrame(animate);
         }
 
-        /** 3. CÁLCULO DE TIEMPO **/
-        function updateTimer() {
+        /** LÓGICA DEL CONTADOR (PROGRESIVO) **/
+        function updateTime() {
             const now = new Date();
-            let diff = now - startDate;
+            let years = now.getFullYear() - startDate.getFullYear();
+            let months = now.getMonth() - startDate.getMonth();
+            let days = now.getDate() - startDate.getDate();
 
-            const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30.44));
-            const days = Math.floor((diff / (1000 * 60 * 60 * 24)) % 30.44);
+            if (days < 0) {
+                months--;
+                days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+            }
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            const diff = now - startDate;
             const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
             const mins = Math.floor((diff / (1000 * 60)) % 60);
             const secs = Math.floor((diff / 1000) % 60);
 
-            document.getElementById('months').innerText = months;
-            document.getElementById('days').innerText = days;
-            document.getElementById('hours').innerText = hours;
-            document.getElementById('mins').innerText = mins;
-            document.getElementById('secs').innerText = secs;
-
-            const nextMilestone = new Date(startDate);
-            nextMilestone.setMonth(startDate.getMonth() + months + 1);
-            const daysLeft = Math.ceil((nextMilestone - now) / (1000 * 60 * 60 * 24));
-            document.getElementById('milestone-text').innerText = `Faltan ${daysLeft} días para nuestro siguiente mesiversario.`;
+            document.getElementById('y').innerText = years;
+            document.getElementById('m').innerText = months;
+            document.getElementById('d').innerText = days;
+            document.getElementById('h').innerText = hours;
+            document.getElementById('min').innerText = mins;
+            document.getElementById('s').innerText = secs;
         }
 
-        /** 4. GESTOS CON MEDIAPIPE **/
-        const videoElement = document.getElementById('input_video');
-        const startBtn = document.getElementById('start-cam');
-        const indicator = document.getElementById('gesture-indicator');
+        /** VISIÓN ARTIFICIAL (MEDIAPIPE) **/
+        const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.8, minTrackingConfidence: 0.7 });
 
-        function onResults(results) {
+        function detectGestures(landmarks) {
+            const up = (i) => landmarks[i].y < landmarks[i-2].y;
+            const thumb = landmarks[4].x < landmarks[3].x; // Simplificado para mano derecha
+
+            if (up(8) && up(12) && up(16) && up(20)) return "PALMA";
+            if (!up(8) && !up(12) && !up(16) && !up(20)) return "PUÑO";
+            if (up(8) && up(12) && !up(16)) return "VICTORIA";
+            if (landmarks[4].y < landmarks[3].y && !up(8)) return "PULGAR";
+            if (up(8) && !up(12)) return "APUNTAR";
+            return "...";
+        }
+
+        let lastAction = 0;
+        hands.onResults(results => {
+            const status = document.getElementById('g-status');
             if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
-                indicator.innerText = "Buscando mano...";
+                status.innerText = "ESPERANDO MANO";
                 return;
             }
 
-            const landmarks = results.multiHandLandmarks[0];
-            const gesture = detectGesture(landmarks);
-            indicator.innerText = "Gesto: " + gesture;
-            executeAction(gesture, landmarks);
-        }
+            const lm = results.multiHandLandmarks[0];
+            const gesture = detectGestures(lm);
+            status.innerText = gesture;
 
-        function detectGesture(lm) {
-            // Lógica simplificada de detección de dedos
-            const thumbUp = lm[4].y < lm[3].y && lm[4].y < lm[2].y;
-            const indexUp = lm[8].y < lm[6].y;
-            const middleUp = lm[12].y < lm[10].y;
-            const ringUp = lm[16].y < lm[14].y;
-            const pinkyUp = lm[20].y < lm[18].y;
-
-            if (indexUp && middleUp && !ringUp && !pinkyUp) return "VICTORIA";
-            if (indexUp && !middleUp && !ringUp && !pinkyUp) return "APUNTAR";
-            if (thumbUp && !indexUp && !middleUp && !ringUp) return "PULGAR_ARRIBA";
-            if (!indexUp && !middleUp && !ringUp && !pinkyUp) return "PUÑO";
-            if (indexUp && middleUp && ringUp && pinkyUp) return "PALMA";
-            
-            // Detección Corazón (Puntas de índices y pulgares cerca)
-            return "TRACKING...";
-        }
-
-        let lastGestureTime = 0;
-        function executeAction(gesture, lm) {
             const now = Date.now();
-            if (now - lastGestureTime < 500 && gesture !== "APUNTAR") return;
+            if(now - lastAction < 600 && gesture !== "APUNTAR") return;
 
-            switch(gesture) {
-                case "PALMA":
-                    isConfettiPaused = !isConfettiPaused;
-                    lastGestureTime = now;
-                    break;
-                case "PUÑO":
-                    const colors = ["#D4AF37", "#FF69B4", "#00F5FF", "#FFFFFF"];
-                    const randomColor = colors[Math.floor(Math.random()*colors.length)];
-                    document.documentElement.style.setProperty('--accent', randomColor);
-                    lastGestureTime = now;
-                    break;
-                case "VICTORIA":
-                    loveMsg.innerText = phrases[Math.floor(Math.random()*phrases.length)];
-                    loveMsg.style.opacity = 1;
-                    setTimeout(() => loveMsg.style.opacity = 0, 2000);
-                    lastGestureTime = now;
-                    break;
-                case "PULGAR_ARRIBA":
-                    scaleFactor = scaleFactor >= 1.5 ? 1 : scaleFactor + 0.1;
-                    document.getElementById('timer').style.transform = `scale(${scaleFactor})`;
-                    lastGestureTime = now;
-                    break;
-                case "APUNTAR":
-                    const x = (1 - lm[8].x) * canvas.width;
-                    const y = lm[8].y * canvas.height;
-                    createTrail(x, y);
-                    break;
+            if(gesture === "PALMA") {
+                isPaused = !isPaused;
+                lastAction = now;
+            } else if(gesture === "PUÑO") {
+                const palette = ["#D4AF37", "#E0115F", "#FFFFFF", "#FFD700"];
+                currentAccent = palette[Math.floor(Math.random()*palette.length)];
+                document.documentElement.style.setProperty('--accent', currentAccent);
+                lastAction = now;
+            } else if(gesture === "VICTORIA") {
+                const overlay = document.getElementById('love-overlay');
+                overlay.innerText = phrases[Math.floor(Math.random()*phrases.length)];
+                overlay.style.opacity = 1;
+                setTimeout(() => overlay.style.opacity = 0, 2000);
+                lastAction = now;
+            } else if(gesture === "PULGAR") {
+                scale = scale > 1.3 ? 1 : scale + 0.1;
+                document.getElementById('main-timer').style.transform = `scale(${scale})`;
+                lastAction = now;
+            } else if(gesture === "APUNTAR") {
+                for(let i=0; i<5; i++) {
+                    trail.push({ x: (1-lm[8].x)*canvas.width, y: lm[8].y*canvas.height, r: Math.random()*5, a: 1 });
+                }
             }
-        }
+        });
 
-        function createTrail(x, y) {
-            for(let i=0; i<3; i++) {
-                confetti.push({
-                    x: x, y: y,
-                    r: Math.random() * 4,
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--accent'),
-                    sx: (Math.random() - 0.5) * 2,
-                    sy: (Math.random() - 0.5) * 2,
-                    alpha: 1
-                });
-            }
-        }
-
-        /** 5. INICIALIZACIÓN **/
-        const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
-        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.5 });
-        hands.onResults(onResults);
-
-        startBtn.onclick = async () => {
-            startBtn.style.display = 'none';
-            document.getElementById('video-container').style.display = 'block';
+        // Iniciar cámara
+        document.getElementById('start-btn').onclick = async () => {
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('video-wrap').style.display = 'block';
+            const videoElement = document.getElementById('input_video');
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             videoElement.srcObject = stream;
             videoElement.play();
             
-            async function detectionLoop() {
+            const runDetection = async () => {
                 await hands.send({image: videoElement});
-                requestAnimationFrame(detectionLoop);
+                requestAnimationFrame(runDetection);
+            };
+            runDetection();
+            
+            // Efecto especial al iniciar (Corazones)
+            for(let i=0; i<30; i++) {
+                hearts.push({
+                    x: canvas.width/2, y: canvas.height/2,
+                    vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+                    s: Math.random()*30+10, a: 1
+                });
             }
-            detectionLoop();
         };
 
-        window.addEventListener('resize', initCanvas);
-        initCanvas();
-        drawParticles();
-        setInterval(updateTimer, 1000);
-        updateTimer();
-
+        window.addEventListener('resize', initStars);
+        initStars();
+        animate();
+        setInterval(updateTime, 1000);
+        updateTime();
     </script>
 </body>
 </html>
